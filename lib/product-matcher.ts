@@ -1,5 +1,6 @@
 import { supabaseAdmin } from './supabase';
 import { getTelegramFileUrl } from './telegram';
+import { parseTelegramPost } from './parser';
 
 export async function processAndSaveProduct({
   channelId,
@@ -14,7 +15,6 @@ export async function processAndSaveProduct({
   photoFileId?: string;
   mediaGroupId?: string;
 }) {
-  const { parseTelegramPost } = await import('./parser');
   const parsed = parseTelegramPost(text);
   if (!parsed || !parsed.name) {
     throw new Error('Could not parse product name from text');
