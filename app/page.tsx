@@ -13,7 +13,6 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState('الكل');
   const [loading, setLoading] = useState(true);
 
-  // جلب المنتجات من قاعدة البيانات
   useEffect(() => {
     async function fetchProducts() {
       const { data } = await supabase
@@ -26,82 +25,134 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  // فلترة المنتجات حسب القسم المختار
   const filteredProducts = products.filter((p) => {
     if (activeCategory === 'الكل') return true;
-    
-    // دمج الاسم والوصف للبحث عن كلمة القسم
     const textToSearch = (p.name + " " + (p.description || "")).toLowerCase();
-    
     if (activeCategory === 'الفواكه') return textToSearch.includes('فواكه');
     if (activeCategory === 'الخضروات') return textToSearch.includes('خضروات');
     if (activeCategory === 'التمور') return textToSearch.includes('تمور');
-    
     return true;
   });
 
-  const categories = ['الكل', 'الفواكه', 'الخضروات', 'التمور'];
+  const categories = [
+    { name: 'الكل', icon: '🛒' },
+    { name: 'الفواكه', icon: '🍎' },
+    { name: 'الخضروات', icon: '🥬' },
+    { name: 'التمور', icon: '🌴' }
+  ];
 
   return (
-    <main className="max-w-5xl mx-auto p-4 font-sans text-right" dir="rtl">
-      <header className="flex justify-between items-center py-6 border-b mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">🛒 سلة الفاكهة</h1>
+    <div className="min-h-screen bg-gray-50 font-sans text-right" dir="rtl">
+      {/* شريط التنقل العلوي */}
+      <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <span className="text-3xl">🧺</span>
+            <h1 className="text-2xl font-extrabold text-green-800 tracking-tight">سلة الفاكهة</h1>
+          </div>
+          <button className="bg-green-50 text-green-700 p-2.5 rounded-full hover:bg-green-100 transition">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </button>
+        </div>
       </header>
 
-      {/* شريط الأقسام */}
-      <div className="flex gap-3 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`px-6 py-2 rounded-full font-bold transition-all duration-200 whitespace-nowrap ${
-              activeCategory === cat
-                ? 'bg-green-600 text-white shadow-md'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* عرض المنتجات */}
-      {loading ? (
-        <div className="text-center text-gray-500 py-10 font-bold">جاري تحميل المنتجات...</div>
-      ) : filteredProducts.length === 0 ? (
-        <div className="text-center text-gray-500 py-10 text-lg border-2 border-dashed rounded-xl">
-          لا توجد منتجات في قسم ({activeCategory}) حالياً!
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* لافتة ترحيبية (Hero Section) */}
+        <div className="bg-gradient-to-l from-green-500 to-emerald-700 rounded-3xl p-8 sm:p-12 text-white mb-10 shadow-lg shadow-green-200 relative overflow-hidden">
+          <div className="relative z-10">
+            <h2 className="text-3xl sm:text-5xl font-black mb-4 leading-tight">طازج من المزرعة <br/> إلى باب بيتك 🌿</h2>
+            <p className="text-green-50 text-lg sm:text-xl max-w-lg opacity-90">ننتقي لك أفضل أنواع الفواكه والخضروات بعناية فائقة، لتصلك طازجة وبأفضل الأسعار.</p>
+          </div>
+          {/* زخرفة خلفية */}
+          <div className="absolute top-[-50px] left-[-50px] text-[15rem] opacity-10 select-none">🍋</div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="border rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow bg-white flex flex-col">
-              {product.image_url ? (
-                <img src={product.image_url} alt={product.name} className="w-full h-56 object-cover" />
-              ) : (
-                <div className="w-full h-56 bg-gray-50 flex items-center justify-center text-gray-400 font-bold">
-                  لا توجد صورة
-                </div>
-              )}
-              <div className="p-5 flex flex-col flex-grow">
-                <h2 className="text-xl font-bold mb-1 text-gray-800">{product.name}</h2>
-                <p className="text-green-600 font-extrabold text-lg mb-3">
-                  {product.price} {product.currency === 'IQD' ? 'د.ع' : product.currency}
-                </p>
-                {product.description && (
-                  <p className="text-gray-500 text-sm whitespace-pre-wrap mb-4 flex-grow">
-                    {/* إخفاء الهاشتاج من واجهة المستخدم ليظهر الوصف نظيفاً */}
-                    {product.description.replace(/#(فواكه|خضروات|تمور)/g, '')}
-                  </p>
-                )}
-                <button className="w-full bg-green-50 text-green-700 border border-green-200 py-2.5 rounded-xl font-bold hover:bg-green-600 hover:text-white transition-colors mt-auto">
-                  إضافة للسلة
-                </button>
-              </div>
-            </div>
+
+        {/* شريط الأقسام */}
+        <div className="flex gap-3 mb-10 overflow-x-auto pb-4 scrollbar-hide snap-x">
+          {categories.map(cat => (
+            <button
+              key={cat.name}
+              onClick={() => setActiveCategory(cat.name)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-lg transition-all duration-300 snap-center whitespace-nowrap shadow-sm border ${
+                activeCategory === cat.name
+                  ? 'bg-green-600 text-white border-green-600 shadow-green-200'
+                  : 'bg-white text-gray-600 border-gray-100 hover:border-green-300 hover:text-green-600'
+              }`}
+            >
+              <span>{cat.icon}</span>
+              {cat.name}
+            </button>
           ))}
         </div>
-      )}
-    </main>
+
+        {/* شبكة المنتجات */}
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
+            {[1, 2, 3, 4].map(n => (
+              <div key={n} className="bg-white rounded-3xl h-80 border border-gray-100 shadow-sm"></div>
+            ))}
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-200 shadow-sm">
+            <span className="text-6xl mb-4 block">🔍</span>
+            <h3 className="text-2xl font-bold text-gray-700 mb-2">لا توجد منتجات حالياً</h3>
+            <p className="text-gray-500">لم يتم إضافة أي منتجات في قسم ({activeCategory}) حتى الآن.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProducts.map((product) => (
+              <div key={product.id} className="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative">
+                
+                {/* علامة القسم (اختيارية) */}
+                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-green-700 text-xs font-black px-3 py-1.5 rounded-full z-10 shadow-sm">
+                  {product.description?.includes('فواكه') ? '🍎 فواكه' : product.description?.includes('خضروات') ? '🥬 خضروات' : product.description?.includes('تمور') ? '🌴 تمور' : '🛒 جديد'}
+                </div>
+
+                <div className="relative h-56 w-full overflow-hidden bg-gray-50">
+                  {product.image_url ? (
+                    <img 
+                      src={product.image_url} 
+                      alt={product.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                      <span className="text-5xl mb-2">📷</span>
+                      <span className="font-medium text-sm">بدون صورة</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-5 flex flex-col flex-grow">
+                  <h2 className="text-xl font-extrabold text-gray-800 mb-2 line-clamp-1">{product.name}</h2>
+                  
+                  {product.description && (
+                    <p className="text-gray-500 text-sm leading-relaxed mb-4 line-clamp-2 flex-grow">
+                      {product.description.replace(/#(فواكه|خضروات|تمور)/g, '')}
+                    </p>
+                  )}
+                  
+                  <div className="flex items-end justify-between mt-auto pt-4">
+                    <div>
+                      <p className="text-xs text-gray-400 font-medium mb-1">السعر</p>
+                      <p className="text-2xl font-black text-green-600">
+                        {product.price} <span className="text-sm font-bold">{product.currency === 'IQD' ? 'د.ع' : product.currency}</span>
+                      </p>
+                    </div>
+                    <button className="bg-green-600 hover:bg-green-700 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-md shadow-green-200">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
   );
 }
