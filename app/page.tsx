@@ -1,7 +1,7 @@
-// app/page.tsx
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode, SVGProps } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 /* ------------------------------------------------------------------ */
@@ -38,9 +38,9 @@ const CATEGORIES = [
 /* ------------------------------------------------------------------ */
 /*  Icons                                                              */
 /* ------------------------------------------------------------------ */
-type IconProps = React.SVGProps<SVGSVGElement>;
+type IconProps = SVGProps<SVGSVGElement>;
 
-const Svg = ({ children, ...props }: IconProps & { children: React.ReactNode }) => (
+const Svg = ({ children, ...props }: IconProps & { children: ReactNode }) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
